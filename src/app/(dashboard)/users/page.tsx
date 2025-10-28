@@ -81,7 +81,6 @@ export default function UsersPage() {
     fetchUsers();
   }, []);
 
-  // ✅ Safe search: only search relevant string fields
   useEffect(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) {
@@ -109,20 +108,28 @@ export default function UsersPage() {
       if (!token) throw new Error("Missing auth token");
 
       const response = await fetch(
-        "https://api.t-coin.code-studio4.com/api/notifications/broadcast",
+        "https://course-selling-app.saveneed.com/api/notifications",
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ message: broadcastMessage }),
+          body: JSON.stringify({
+            title: "Broadcast Message", // ✅ Required field
+            description: broadcastMessage, // ✅ Backend expects this instead of "message"
+          }),
         }
       );
 
-      if (!response.ok) throw new Error("Broadcast failed");
+      const data = await response.json();
+      console.log("Broadcast response:", data);
 
-      toast.success("Broadcast sent successfully!");
+      if (!response.ok) {
+        throw new Error(data.message || "Broadcast failed");
+      }
+
+      toast.success(data.message || "Broadcast sent successfully!");
       setBroadcastMessage("");
       setIsDialogOpen(false);
     } catch (error) {

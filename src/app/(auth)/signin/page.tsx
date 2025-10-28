@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -13,8 +13,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-
-import { useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignInPage() {
@@ -24,16 +22,16 @@ export default function SignInPage() {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
+  // ✅ Check existing auth token on mount
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
-      router.push("/");
+      router.replace("/"); // Use replace() to prevent back navigation to login
     } else {
       setCheckingAuth(false);
     }
@@ -52,13 +50,12 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      const url =
-        "https://course-selling-app.saveneed.com/api/admin/auth/login";
+      // ✅ FIXED: Removed trailing spaces
+      const url = "http://localhost:5002/api/admin/auth/login";
+
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mobile_number: formData.mobile_number,
           password: formData.password,
@@ -67,41 +64,35 @@ export default function SignInPage() {
 
       const data = await response.json();
 
+      console.log("Sign in response", response);
+
       console.log("Sign in response data:", data);
 
-      if (response.ok) {
-        if (data.token) {
-          localStorage.setItem("authToken", data.token);
-        }
+      if (response.ok && data.token && data.admin) {
+        console.log("Sign in successful:", data);
+        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("user", JSON.stringify(data.admin));
+        localStorage.setItem("adminType", data.admin.type || "admin");
 
-        if (data?.user) {
-          console.log("Storing user:", data.user);
-          localStorage.setItem("authToken", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
-
-          // ✅ Store user type from API (more reliable than checkbox)
-          const userType = data.user.type;
-          localStorage.setItem("adminType", userType);
-
-          // ✅ Redirect based on actual user type from backend
-          const redirectPath = "/";
-
-          router.push(redirectPath);
-        }
-      } else {
-        setErrorMessage(
-          data.message || "Sign in failed. Please check your credentials."
-        );
-        setErrorModalOpen(true);
+        // ✅ Redirect immediately
+        router.replace("/");
+        return; // prevent further execution
       }
+
+      // Handle error
+      setErrorMessage(
+        data.message || "Sign in failed. Please check your credentials."
+      );
+      setErrorModalOpen(true);
     } catch (error) {
       console.error("Sign in error:", error);
-      setErrorMessage("An error occurred during sign in. Please try again.");
+      setErrorMessage("An error occurred. Please try again.");
       setErrorModalOpen(true);
     } finally {
       setIsLoading(false);
     }
   };
+
   if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -114,6 +105,7 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF] p-4">
+      {/* 🔴 Error Modal */}
       <Dialog open={errorModalOpen} onOpenChange={setErrorModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -133,6 +125,7 @@ export default function SignInPage() {
         </DialogContent>
       </Dialog>
 
+      {/* 🟢 Sign In Card */}
       <Card className="w-full max-w-md bg-[#f9fafb] shadow-xl rounded-2xl">
         <CardContent className="p-8">
           <h1 className="text-3xl font-bold mb-1 text-primary text-center">
@@ -143,6 +136,7 @@ export default function SignInPage() {
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
+            {/* Phone Number */}
             <div>
               <Label htmlFor="mobile_number" className="text-sm text-gray-700">
                 Phone Number
@@ -158,6 +152,7 @@ export default function SignInPage() {
               />
             </div>
 
+            {/* Password */}
             <div className="relative">
               <Label htmlFor="password" className="text-sm text-gray-700">
                 PIN Number
@@ -187,16 +182,7 @@ export default function SignInPage() {
               </div>
             </div>
 
-            {/* <div className="flex justify-between items-center text-sm text-gray-500">
-              <Button
-                variant="link"
-                className="p-0 text-[#6366F1] hover:underline"
-                onClick={() => router.push("/forgot-password")}
-              >
-                Forgot PIN?
-              </Button>
-            </div> */}
-
+            {/* Submit Button */}
             <Button
               type="submit"
               disabled={isLoading}
@@ -206,7 +192,7 @@ export default function SignInPage() {
             </Button>
 
             <p className="text-center text-sm text-gray-500 mt-4">
-              Do not have an account?{" "}
+              Don’t have an account?{" "}
               <a href="/signup" className="text-[#6366F1] hover:underline">
                 Sign Up
               </a>

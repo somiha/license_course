@@ -46,27 +46,33 @@ function UserActions({
     setIsSending(true);
     try {
       const response = await fetch(
-        `https://api.t-coin.code-studio4.com/api/notifications`,
+        `https://course-selling-app.saveneed.com/api/notifications`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: Number(userId),
-            message: message,
+            user_id: Number(userId), // ✅ correct key name
+            title: "Admin Notification", // ✅ backend expects a title
+            description: message, // ✅ backend expects description, not "message"
           }),
         }
       );
 
-      if (!response.ok) throw new Error("Failed to send notification");
+      const data = await response.json();
+      console.log("Notification response:", data);
 
-      toast.success("Notification sent successfully");
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send notification");
+      }
+
+      toast.success(data.message || "Notification sent successfully");
       setIsDialogOpen(false);
       setMessage("");
     } catch (error) {
       toast.error("Failed to send notification");
-      console.error(error);
+      console.error("Notification error:", error);
     } finally {
       setIsSending(false);
     }
