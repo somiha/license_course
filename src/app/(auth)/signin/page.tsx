@@ -51,7 +51,8 @@ export default function SignInPage() {
 
     try {
       // ✅ FIXED: Removed trailing spaces
-      const url = "http://localhost:5002/api/admin/auth/login";
+      const url =
+        "https://course-selling-app.saveneed.com/api/admin/auth/login";
 
       const response = await fetch(url, {
         method: "POST",
