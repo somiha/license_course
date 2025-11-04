@@ -24,7 +24,7 @@ export type Banner = {
   active: boolean;
 };
 
-const BASE_URL = "http://localhost:5002";
+const BASE_URL = "https://course-selling-app.saveneed.com";
 
 export const columns: ColumnDef<Banner>[] = [
   { accessorKey: "id", header: "Banner ID" },

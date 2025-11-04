@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const BASE_URL = "http://localhost:5002";
+const BASE_URL = "https://course-selling-app.saveneed.com";
 
 export default function AddCoursePage() {
   const [formData, setFormData] = useState({

@@ -18,7 +18,7 @@ interface BannerFromAPI {
   updated_at: string;
 }
 
-const BASE_URL = "http://localhost:5002";
+const BASE_URL = "https://course-selling-app.saveneed.com";
 
 export default function Banners() {
   const [banners, setBanners] = useState<Banner[]>([]);

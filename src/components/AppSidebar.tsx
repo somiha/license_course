@@ -59,6 +59,8 @@ const adminItems: MenuItem[] = [
   { name: "Banners", icon: Film, href: "/banners" },
   { name: "Categories", icon: Film, href: "/category" },
   { name: "Courses", icon: Shield, href: "/courses" },
+  { name: "Chapters", icon: Shield, href: "/chapters" },
+  { name: "Chapter-Items", icon: Shield, href: "/chapter-items" },
   {
     name: "Terms & Conditions",
     icon: FileText,

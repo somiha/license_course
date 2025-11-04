@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const BASE_URL = "http://localhost:5002";
+const BASE_URL = "https://course-selling-app.saveneed.com";
 
 export default function AddBannerPage() {
   const router = useRouter();
