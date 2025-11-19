@@ -271,17 +271,17 @@ export default function AddChapterPage() {
 
             <div className="space-y-2">
               <select
-                id="chapterId"
-                name="chapterId"
-                value={detailForm.chapterId}
+                id="courseId"
+                name="courseId"
+                value={chapterForm.courseId}
                 onChange={handleInputChange}
                 className="w-full border rounded p-2"
                 required
               >
                 <option value="">-- Select a Courses --</option>
-                {courses.map((ch) => (
-                  <option key={ch.id} value={ch.id}>
-                    {ch.name}
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
                   </option>
                 ))}
               </select>
@@ -371,7 +371,7 @@ export default function AddChapterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="serialId">Serial ID *</Label>
+              <Label htmlFor="serialId">Serial ID</Label>
               <Input
                 id="serialId"
                 name="serialId"
@@ -379,7 +379,6 @@ export default function AddChapterPage() {
                 value={detailForm.serialId}
                 onChange={handleInputChange}
                 placeholder="1"
-                required
               />
             </div>
 
