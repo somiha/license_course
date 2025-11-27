@@ -20,10 +20,10 @@ import Image from "next/image";
 // === TYPES ===
 export type Chapter = {
   id: string;
-  courseId: number;
+  topicId: number;
   title: string;
   image: string | null;
-  courseName: string;
+  topicName: string;
 };
 
 interface ChapterDetail {
@@ -44,7 +44,7 @@ const BASE_URL = "https://course-selling-app.saveneed.com";
 export const chapterColumns: ColumnDef<Chapter>[] = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "title", header: "Title" },
-  { accessorKey: "courseName", header: "Course" },
+  { accessorKey: "topicName", header: "Topic" },
   {
     id: "image",
     header: "Image",
@@ -85,13 +85,13 @@ function ViewChapterDetails({ chapter }: { chapter: Chapter }) {
   const [isOpen, setIsOpen] = useState(false);
   const [details, setDetails] = useState<ChapterDetail[]>([]);
   const [loading, setLoading] = useState(false);
-  const [courseName, setCourseName] = useState<string>("Loading...");
+  const [topicName, settopicName] = useState<string>("Loading...");
 
   useEffect(() => {
     if (!isOpen) {
       // Reset on close
       setDetails([]);
-      setCourseName("Loading...");
+      settopicName("Loading...");
       return;
     }
 
@@ -103,14 +103,14 @@ function ViewChapterDetails({ chapter }: { chapter: Chapter }) {
 
         // Fetch lesson items
         const detailsRes = await fetch(
-          `${BASE_URL}/api/chapter-details?chapter_id=${chapter.id}&page=1&limit=50`,
+          `${BASE_URL}/api/chapter-details/chapter/${chapter.id}?page=1&limit=50`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         if (!detailsRes.ok) {
-          // If non-OK, ensure details empty and continue to course fetch
+          // If non-OK, ensure details empty and continue to topic fetch
           console.error("Failed to load lesson items:", detailsRes.statusText);
           setDetails([]);
         } else {
@@ -141,27 +141,27 @@ function ViewChapterDetails({ chapter }: { chapter: Chapter }) {
           setDetails(validDetails);
         }
 
-        // Fetch course name
-        if (chapter.courseId) {
-          const courseRes = await fetch(
-            `${BASE_URL}/api/courses/${chapter.courseId}`,
+        // Fetch topic name
+        if (chapter.topicId) {
+          const topicRes = await fetch(
+            `${BASE_URL}/api/topics/${chapter.topicId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
 
-          if (courseRes.ok) {
-            const json = await courseRes.json();
-            setCourseName(json?.course?.name || "Unknown Course");
+          if (topicRes.ok) {
+            const json = await topicRes.json();
+            settopicName(json?.topic?.name || "Unknown topic");
           } else {
-            setCourseName("Not Found");
+            settopicName("Not Found");
           }
         } else {
-          setCourseName("Not Found");
+          settopicName("Not Found");
         }
       } catch (err) {
         console.error("Fetch error:", err);
-        setCourseName("Error");
+        settopicName("Error");
         setDetails([]); // be safe
       } finally {
         setLoading(false);
@@ -169,7 +169,7 @@ function ViewChapterDetails({ chapter }: { chapter: Chapter }) {
     };
 
     fetchData();
-  }, [isOpen, chapter.id, chapter.courseId]);
+  }, [isOpen, chapter.id, chapter.topicId]);
 
   return (
     <>
@@ -186,7 +186,7 @@ function ViewChapterDetails({ chapter }: { chapter: Chapter }) {
           <DialogHeader>
             <DialogTitle className="text-2xl">{chapter.title}</DialogTitle>
             <p className="text-sm text-muted-foreground">
-              Course: <strong>{courseName}</strong> • Chapter ID: {chapter.id}
+              topic: <strong>{topicName}</strong> • Chapter ID: {chapter.id}
             </p>
           </DialogHeader>
 
@@ -316,15 +316,15 @@ function ViewChapterDetails({ chapter }: { chapter: Chapter }) {
   );
 }
 
-// =============== EDIT MODAL (Full Editable + Course Name) ===============
+// =============== EDIT MODAL (Full Editable + topic Name) ===============
 function EditChapterModal({ chapter }: { chapter: Chapter }) {
   const [isOpen, setIsOpen] = useState(false);
   const [chapterData, setChapterData] = useState({
     title: chapter.title,
-    courseId: chapter.courseId.toString(),
+    topicId: chapter.topicId.toString(),
   });
   const [details, setDetails] = useState<ChapterDetail[]>([]);
-  const [courseName, setCourseName] = useState<string>("Loading...");
+  const [topicName, settopicName] = useState<string>("Loading...");
   const chapterImageRef = useRef<HTMLInputElement>(null);
   const detailFileRefs = useRef<{
     [key: number]: { image?: File; video?: File };
@@ -375,32 +375,32 @@ function EditChapterModal({ chapter }: { chapter: Chapter }) {
           setDetails([]);
         }
 
-        // Fetch course name
-        if (chapter.courseId) {
-          const courseRes = await fetch(
-            `${BASE_URL}/api/courses/${chapter.courseId}`,
+        // Fetch topic name
+        if (chapter.topicId) {
+          const topicRes = await fetch(
+            `${BASE_URL}/api/topics/${chapter.topicId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
 
-          if (courseRes.ok) {
-            const json = await courseRes.json();
-            setCourseName(json?.course?.name || "Unknown Course");
+          if (topicRes.ok) {
+            const json = await topicRes.json();
+            settopicName(json?.topic?.name || "Unknown topic");
           } else {
-            setCourseName("Not Found");
+            settopicName("Not Found");
           }
         } else {
-          setCourseName("Not Found");
+          settopicName("Not Found");
         }
       } catch (err) {
         console.error("Fetch error:", err);
-        setCourseName("Error");
+        settopicName("Error");
         setDetails([]);
       }
     };
     fetchData();
-  }, [isOpen, chapter.id, chapter.courseId]);
+  }, [isOpen, chapter.id, chapter.topicId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -445,7 +445,7 @@ function EditChapterModal({ chapter }: { chapter: Chapter }) {
       // Update main chapter
       const formData = new FormData();
       formData.append("title", chapterData.title);
-      formData.append("course_id", chapterData.courseId);
+      formData.append("topic_id", chapterData.topicId);
 
       const imgFile = chapterImageRef.current?.files?.[0];
       if (imgFile) formData.append("image", imgFile);
@@ -501,7 +501,7 @@ function EditChapterModal({ chapter }: { chapter: Chapter }) {
           <DialogHeader>
             <DialogTitle>Edit Chapter: {chapter.title}</DialogTitle>
             <p className="text-sm text-muted-foreground">
-              Belongs to course: <strong>{courseName}</strong>
+              Belongs to topic: <strong>{topicName}</strong>
             </p>
           </DialogHeader>
 
@@ -517,16 +517,16 @@ function EditChapterModal({ chapter }: { chapter: Chapter }) {
                 />
               </div>
               <div>
-                <Label>Course ID</Label>
+                <Label>topic ID</Label>
                 <Input
-                  name="courseId"
+                  name="topicId"
                   type="number"
-                  value={chapterData.courseId}
+                  value={chapterData.topicId}
                   onChange={handleChange}
                   disabled
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Course: <strong>{courseName}</strong>
+                  topic: <strong>{topicName}</strong>
                 </p>
               </div>
             </div>

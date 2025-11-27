@@ -16,7 +16,7 @@ export default function AddChapterPage() {
   // ===============================
   const [chapterForm, setChapterForm] = useState({
     title: "",
-    courseId: "",
+    topicId: "",
   });
   const [chapterImage, setChapterImage] = useState<File | null>(null);
   const [chapterImagePreview, setChapterImagePreview] = useState<string | null>(
@@ -46,7 +46,7 @@ export default function AddChapterPage() {
   );
   const [isSubmittingDetail, setIsSubmittingDetail] = useState(false);
   const [chapters, setChapters] = useState<{ id: number; title: string }[]>([]);
-  const [courses, setCourses] = useState<{ id: number; name: string }[]>([]);
+  const [topics, setTopics] = useState<{ id: number; title: string }[]>([]);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -72,13 +72,13 @@ export default function AddChapterPage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/api/courses`);
+        const res = await fetch(`${BASE_URL}/api/topics`);
         const data = await res.json();
-        if (res.ok && data.courses) {
-          setCourses(data.courses);
+        if (res.ok && data.details) {
+          setTopics(data.details);
         }
       } catch (error) {
-        console.error("Error fetching courses:", error);
+        console.error("Error fetching topics:", error);
       }
     };
     fetchCourses();
@@ -139,7 +139,7 @@ export default function AddChapterPage() {
   const handleChapterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!chapterForm.title.trim() || !chapterForm.courseId.trim()) {
+    if (!chapterForm.title.trim() || !chapterForm.topicId.trim()) {
       toast.error("All fields are required");
       return;
     }
@@ -155,7 +155,7 @@ export default function AddChapterPage() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("title", chapterForm.title);
-      formDataToSend.append("course_id", chapterForm.courseId);
+      formDataToSend.append("topic_id", chapterForm.topicId);
       if (chapterImage) formDataToSend.append("image", chapterImage);
 
       const response = await fetch(`${BASE_URL}/api/chapters`, {
@@ -168,7 +168,7 @@ export default function AddChapterPage() {
 
       if (response.ok && result.chapter) {
         toast.success("Chapter created successfully!");
-        setChapterForm({ title: "", courseId: "" });
+        setChapterForm({ title: "", topicId: "" });
         setChapterImage(null);
         setChapterImagePreview(null);
         setChapters((prev) => [...prev, result.chapter]);
@@ -271,17 +271,17 @@ export default function AddChapterPage() {
 
             <div className="space-y-2">
               <select
-                id="courseId"
-                name="courseId"
-                value={chapterForm.courseId}
+                id="topicId"
+                name="topicId"
+                value={chapterForm.topicId}
                 onChange={handleInputChange}
                 className="w-full border rounded p-2"
                 required
               >
-                <option value="">-- Select a Courses --</option>
-                {courses.map((c) => (
+                <option value="">-- Select a topics --</option>
+                {topics.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {c.title}
                   </option>
                 ))}
               </select>
@@ -390,7 +390,7 @@ export default function AddChapterPage() {
                 value={detailForm.description}
                 onChange={handleInputChange}
                 className="w-full border rounded p-2 min-h-[100px]"
-                placeholder="Welcome to the course..."
+                placeholder="Welcome to the topic..."
                 required
               />
             </div>
