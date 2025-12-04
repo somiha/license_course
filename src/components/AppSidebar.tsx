@@ -67,6 +67,11 @@ const adminItems: MenuItem[] = [
     icon: FileText,
     href: "/terms-conditions",
   },
+  {
+    name: "Buy Course Info",
+    icon: FileText,
+    href: "/buy-course-info",
+  },
 ];
 
 const baseMenuItems: MenuItem[] = [];
