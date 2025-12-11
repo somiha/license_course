@@ -243,6 +243,7 @@ function EditTopicModal({ topic }: { topic: Topic }) {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(topic.image);
   const [videoPreview, setVideoPreview] = useState<string | null>(topic.video);
   const [courseName, setCourseName] = useState<string>("Loading...");
@@ -300,7 +301,7 @@ function EditTopicModal({ topic }: { topic: Topic }) {
   const handleSave = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) return;
-
+    setIsSubmitting(true);
     try {
       const fd = new FormData();
       fd.append("title", formData.title);
@@ -328,6 +329,8 @@ function EditTopicModal({ topic }: { topic: Topic }) {
     } catch (error) {
       console.error(error);
       alert("Network error.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -451,14 +454,19 @@ function EditTopicModal({ topic }: { topic: Topic }) {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
+              disabled={isSubmitting}
               className="bg-gradient-to-r from-[rgb(var(--gradient-from))] via-[rgb(var(--gradient-via))] to-[rgb(var(--gradient-to))] text-white hover:opacity-90"
             >
-              Save Changes
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>

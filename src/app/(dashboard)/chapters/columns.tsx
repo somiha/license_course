@@ -325,6 +325,7 @@ function EditChapterModal({ chapter }: { chapter: Chapter }) {
   });
   const [details, setDetails] = useState<ChapterDetail[]>([]);
   const [topicName, settopicName] = useState<string>("Loading...");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const chapterImageRef = useRef<HTMLInputElement>(null);
   const detailFileRefs = useRef<{
     [key: number]: { image?: File; video?: File };
@@ -440,6 +441,7 @@ function EditChapterModal({ chapter }: { chapter: Chapter }) {
   const handleSave = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) return;
+    setIsSubmitting(true);
 
     try {
       // Update main chapter
@@ -483,6 +485,8 @@ function EditChapterModal({ chapter }: { chapter: Chapter }) {
     } catch (error) {
       console.error("Save failed:", error);
       alert("An error occurred while saving.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -681,14 +685,19 @@ function EditChapterModal({ chapter }: { chapter: Chapter }) {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
+              disabled={isSubmitting}
               className="bg-gradient-to-r from-[rgb(var(--gradient-from))] via-[rgb(var(--gradient-via))] to-[rgb(var(--gradient-to))] text-white hover:opacity-90"
             >
-              Save All
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>

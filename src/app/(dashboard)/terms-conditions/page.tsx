@@ -19,6 +19,7 @@ export default function TermsAndConditionsPage() {
   const [policy, setPolicy] = useState<PolicyInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     about_us: "",
     terms_condition: "",
@@ -80,6 +81,7 @@ export default function TermsAndConditionsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("Missing auth token");
@@ -110,6 +112,8 @@ export default function TermsAndConditionsPage() {
       toast.error(
         error instanceof Error ? error.message : "Failed to update policies"
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -200,9 +204,10 @@ export default function TermsAndConditionsPage() {
           <Button
             type="button"
             onClick={handleSubmit}
+            disabled={isSubmitting}
             className="bg-gradient-to-r from-[rgb(var(--gradient-from))] via-[rgb(var(--gradient-via))] to-[rgb(var(--gradient-to))] text-white hover:opacity-90"
           >
-            Save All Changes
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
           <Button
             type="button"

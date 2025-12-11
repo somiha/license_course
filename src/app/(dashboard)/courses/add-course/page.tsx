@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const BASE_URL = "https://course-selling-app.saveneed.com";
+const BASE_URL = "https://course-selling-app.saveneed.com"; // ← fixed
 
 export default function AddCoursePage() {
   const [formData, setFormData] = useState({
@@ -19,7 +19,7 @@ export default function AddCoursePage() {
     discountedPrice: "",
     courseDuration: "",
     time: "",
-    videoLecture: "0", // ← stringified number
+    videoLecture: "0",
     pdfLecture: "0",
     liveClass: "0",
     learnFromCourse: "",
@@ -29,11 +29,28 @@ export default function AddCoursePage() {
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
+    []
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  // Fetch categories
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/categories`)
+      .then((res) => res.json())
+      .then((data) => {
+        // Handle both [{}] and { categories: [...] } formats
+        const list = Array.isArray(data) ? data : data.categories || [];
+        setCategories(list);
+      })
+      .catch((err) => console.error("Failed to load categories", err));
+  }, []);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -55,7 +72,7 @@ export default function AddCoursePage() {
     }
 
     if (!formData.name.trim() || !formData.categoryId.trim()) {
-      alert("Please fill in required fields: Name and Category ID");
+      alert("Please fill in required fields: Name and Category");
       return;
     }
 
@@ -191,17 +208,26 @@ export default function AddCoursePage() {
               />
             </div>
 
-            {/* Category & Instructor ID */}
+            {/* ✅ Category ID replaced with dropdown */}
             <div>
-              <Label htmlFor="categoryId">Category ID *</Label>
-              <Input
+              <Label htmlFor="categoryId">Category *</Label>
+              <select
                 id="categoryId"
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleChange}
-                placeholder="e.g. 2"
-              />
+                className="w-full p-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">Select a category</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Instructor ID */}
             <div>
               <Label htmlFor="instructorId">Instructor ID (optional)</Label>
               <Input
@@ -213,7 +239,7 @@ export default function AddCoursePage() {
               />
             </div>
 
-            {/* ✅ REPLACED: Lecture Counts as Number Inputs */}
+            {/* Lecture Counts */}
             <div className="md:col-span-2">
               <Label>Lecture Counts</Label>
               <div className="grid grid-cols-3 gap-3 mt-2">

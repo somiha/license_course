@@ -120,7 +120,7 @@ export default function AddTopicPage() {
       const result = await res.json();
 
       if (res.ok && result.detail) {
-        toast.success("Topic added successfully!");
+        alert("Topic created successfully!");
         // Reset form
         setForm({
           courseId: "",

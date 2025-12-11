@@ -21,6 +21,7 @@ export default function BuyCourseInfoPage() {
   const [info, setInfo] = useState<BuyCourseInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     info: "",
     video_link: "",
@@ -87,6 +88,7 @@ export default function BuyCourseInfoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("Missing auth token");
@@ -116,6 +118,8 @@ export default function BuyCourseInfoPage() {
       toast.error(
         error instanceof Error ? error.message : "Failed to update course info"
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -231,13 +235,15 @@ export default function BuyCourseInfoPage() {
           <Button
             type="button"
             onClick={handleSubmit}
+            disabled={isSubmitting}
             className="bg-gradient-to-r from-[rgb(var(--gradient-from))] via-[rgb(var(--gradient-via))] to-[rgb(var(--gradient-to))] text-white hover:opacity-90"
           >
-            Save Changes
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
           <Button
             type="button"
             variant="outline"
+            disabled={isSubmitting}
             onClick={() => {
               setEditMode(false);
               if (info) {
